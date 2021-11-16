@@ -1,0 +1,4 @@
+check if file
+has exactly
+ten words
+on counting it
