@@ -12,22 +12,22 @@ object WcApp {
 
   def byteCount(file: File): Long = file.length
   def characterCount(file: File): Long = {
-    @tailrec def charCount(iter: Iterator[String])(implicit acc: Long = 0): Long = {
-      if (iter.hasNext) charCount(iter)(acc + iter.next().length)
+    @tailrec def charCount(acc: Long = 0, iter: Iterator[String]): Long = {
+      if (iter.hasNext) charCount(acc + iter.next().length, iter)
       else acc
     }
-    charCount(getLines(file))
+    charCount(iter = getLines(file))
   }
   def wordCount(file: File): Long = getLines(file).flatMap(_.split("\\W+")).length
   def lineCount(file: File): Long = getLines(file).length
   def longestLineSize(file: File): Long = {
-    @tailrec def longestLine(iter: Iterator[String])(implicit max: Long = 0): Long = {
+    @tailrec def longestLine(max: Long = 0, iter: Iterator[String]): Long = {
       if (iter.hasNext) {
         val lineSize = iter.next().length
-        longestLine(iter)(max.max(lineSize))
+        longestLine(max.max(lineSize), iter)
       } else max
     }
-    longestLine(getLines(file))
+    longestLine(iter = getLines(file))
   }
 
   def getLines(file: File): Iterator[String] = Source.fromFile(file).getLines()
