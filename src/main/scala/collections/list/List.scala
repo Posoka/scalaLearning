@@ -3,6 +3,7 @@ package collections.list
 import scala.annotation.tailrec
 
 sealed trait List [+A] {
+
   def size: Long
   def isEmpty: Boolean = {
     this match {
@@ -70,6 +71,7 @@ sealed trait List [+A] {
   // appends element to the beginning of list
   def cons[B >: A](a: B): List[B]
 
+  def foreach[U](f: A => U): Unit = ???
   // High order functions
   // Recursively implement the following methods:
   def map [B] (f: A => B): List[B] = {
@@ -139,6 +141,28 @@ sealed trait List [+A] {
       }
     }
   }
+
+  def flatMap[B](f: A => IterableOnce[B]): List[B] = {
+    head match {
+      case Nil => Nil
+      case _ => tail match {
+        case Nil => List(f(head).iterator.toSeq: _*)
+        case _ => List(f(head).iterator.toSeq: _*).append(tail.flatMap(f))
+      }
+    }
+  }
+
+  def withFilter(predicate: A => Boolean): WithFilter = new WithFilter(this, predicate)
+  private final class WithFilter (list: List[A], predicate: A => Boolean) {
+    private val filtered = list.filter(predicate)
+    def map[B](f: A => B): List[B] = filtered.map(f)
+
+    def flatMap[B](f: A => IterableOnce[B]): List[B] = filtered.flatMap(f)
+
+    def foreach[U](f: A => U): Unit = filtered.foreach(f)
+
+    def withFilter(q: A => Boolean): WithFilter = new WithFilter(filtered, q)
+  }
 }
 
 object List {
@@ -184,4 +208,4 @@ case object Nil extends List[Nothing] {
 
 
 // something else is also missing ;)?
-// [JB] no idea, what
+// isn't it about WithFilter class?
