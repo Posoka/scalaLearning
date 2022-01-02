@@ -124,36 +124,27 @@ sealed trait List [+A] {
 
   // Currying
   def foldLeft [B] (z: B) (operator: (B, A) => B): B = {
-    head match {
-      case Nil => z
-      case _ => tail match {
-        case Nil => operator(z, head)
-        case _ => tail.foldLeft(z)(operator)
-      }
+    tail match {
+      case Nil => operator(z, head)
+      case _ => tail.foldLeft(z)(operator)
     }
   }
   def foldRight [B] (z: B) (operator: (A, B) => B): B = {
-    last match {
-      case Nil => z
-      case _ => init match {
-        case Nil => operator(last, z)
-        case _ => init.foldRight(z)(operator)
-      }
+    init match {
+      case Nil => operator(last, z)
+      case _ => init.foldRight(z)(operator)
     }
   }
 
   def flatMap[B](f: A => IterableOnce[B]): List[B] = {
-    head match {
-      case Nil => Nil
-      case _ => tail match {
-        case Nil => List(f(head).iterator.toSeq: _*)
-        case _ => List(f(head).iterator.toSeq: _*).append(tail.flatMap(f))
-      }
+    tail match {
+      case Nil => List(f(head).iterator.toSeq: _*)
+      case _ => List(f(head).iterator.toSeq: _*).append(tail.flatMap(f))
     }
   }
 
   def withFilter(predicate: A => Boolean): WithFilter = new WithFilter(this, predicate)
-  private final class WithFilter (list: List[A], predicate: A => Boolean) {
+  final class WithFilter (list: List[A], predicate: A => Boolean) {
     private val filtered = list.filter(predicate)
     def map[B](f: A => B): List[B] = filtered.map(f)
 
